@@ -39,6 +39,8 @@ while ( my $line = <GFF> ) {
         next;
     }
     if(($last_gene_id ne $array[0]) and ($last_gene_id ne 'o')){
+        $last_gene_end = $array[4];
+        $last_gene_frame = $array[6];
         $last_gene_id = $array[0];
         next;
     }
@@ -67,7 +69,7 @@ while ( my $line = <GFF> ) {
         );
 
         if($intergenic_end - $intergenic_start < 0){
-            print($gene_name ." " . $output_intergenic->length() ." ".$attrs[0] . "\n");
+            print($gene_name ." " . $output_intergenic->length() ." ".$attrs[0] . " from:" . $last_gene_end. " to ". $gene_start."\n");
         }
 
         $total_length += $output_intergenic->length();
