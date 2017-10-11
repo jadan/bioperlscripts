@@ -35,7 +35,10 @@ while ( my $line = <GFF> ) {
     my $type = $array[2];
 
     #Skip if GFF line is a comment, the genes are in a scaffold, or if the last gene was the last one in a chromosome.
-    if (($array[0] =~ m/#/) or ($array[0] =~ m/scaffold/) or ($array[0] ne $last_gene_id)) {
+    if (($array[0] =~ m/#/) or ($array[0] =~ m/scaffold/)) {
+        next;
+    }
+    if($last_gene_id ne $array[0]){
         next;
     }
 
