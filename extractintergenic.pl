@@ -1,5 +1,5 @@
 #!/bin/perl -w #!/usr/bin/perl
-
+#Base script modified from https://www.biostars.org/p/46281/
 use strict;
 use warnings;
 use Bio::Seq;
