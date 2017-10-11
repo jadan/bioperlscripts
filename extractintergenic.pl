@@ -121,7 +121,7 @@ while ( my $line = <GFF> ) {
         #if current gene is within last gene, don't update last_gene_end
         if($overlapped != 1){
             $last_gene_end = $gene_end;
-        }else if(($overlapped) and ($gene_end > $last_gene_end)){
+        }elsif(($overlapped) and ($gene_end > $last_gene_end)){
             $last_gene_end = $gene_end;
         }
         $last_gene_frame = $temp_frame;
