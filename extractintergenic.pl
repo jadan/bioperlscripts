@@ -41,6 +41,7 @@ while ( my $line = <GFF> ) {
     if(($last_gene_id ne $array[0]) and ($last_gene_id ne 'o')){
         $last_gene_end = $array[4];
         $last_gene_frame = $array[6];
+        $last_gene_start = $array[3];
         $last_gene_id = $array[0];
         next;
     }
@@ -56,21 +57,27 @@ while ( my $line = <GFF> ) {
         $attrs[0] =~ s/ID=//;
 
         # The intergenic sequence.
-        my $intergenic_start = $last_gene_end + 1;
-        my $intergenic_end = $gene_start - 1;
-
-        my $intergenic_seq = $db->seq( $array[0], $intergenic_start, $intergenic_end);
+        my $intergenic_start;
+        my $intergenic_end;
         
+        if($last_gene_end > $gene_start){
+            $intergenic_start = $gene_end + 1;
+            $intergenic_end = $last_gene_start - 1;
+        }else{
+            $intergenic_start = $last_gene_end + 1;
+            $intergenic_end = $gene_start - 1;
+        }
+
+        if($intergenic_end - $intergenic_start < 0){print $gene_name." ".$attrs[0]."\n";}
+        
+        my $intergenic_seq = $db->seq( $array[0], $intergenic_start, $intergenic_end);
+
         my $output_intergenic = Bio::Seq->new(
             -seq        => $intergenic_seq,
             -id         => $gene_name."_intergenic",
             -display_id => $gene_name."_intergenic",
             -alphabet   => 'dna',
         );
-
-        if($intergenic_end - $intergenic_start < 0){
-            print($gene_name ." " . $output_intergenic->length() ." ".$attrs[0] . " from:" . $last_gene_end. " to ". $gene_start."\n");
-        }
 
         $total_length += $output_intergenic->length();
 
@@ -99,6 +106,7 @@ while ( my $line = <GFF> ) {
     } elsif ($type eq 'gene') {
         #First gene.
         $last_gene_end = $array[4];
+        $last_gene_start = $array[3];
         $last_gene_frame = $array[6];
         $last_gene_id = $array[0];
         print("Found first gene.\n")
