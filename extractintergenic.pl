@@ -84,7 +84,8 @@ while ( my $line = <GFF> ) {
 
         if($intergenic_end - $intergenic_start < 0){
             #this few (65 in Phaseolus vulgaris transcripts are out of order and create problems, ignore.)
-
+            $intergenic_start = 1;
+            $intergenic_end = 1;
         }
 
         my $intergenic_seq = $db->seq( $array[0], $intergenic_start, $intergenic_end);
@@ -102,10 +103,12 @@ while ( my $line = <GFF> ) {
         if($output_intergenic->length() > 1){
             if ($current_frame eq $last_gene_frame) {
                 $counter[0] +=1;
+                print $gene_name.",".$attrs[0].",".$output_intergenic->length().",".$intergenic_start.",".$intergenic_end."\n";
                 $outfile_intergenic->write_seq($output_intergenic);
 
             }elsif (($current_frame eq '-') and ($last_gene_frame eq '+')){
                 $counter[1] +=1;
+                print $gene_name.",".$attrs[0].",".$output_intergenic->length().",".$intergenic_start.",".$intergenic_end."\n";
                 $outfile_intergenic->write_seq($output_intergenic);
 
             }elsif (($current_frame eq '+') and ($last_gene_frame eq '-')){
