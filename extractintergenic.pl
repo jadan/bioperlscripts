@@ -50,6 +50,8 @@ while ( my $line = <GFF> ) {
         my $gene_name = "prueba".$total_sequences_extracted;
         my $gene_start = $array[3];
         my $gene_end = $array[4];
+        my @attrs = split( ";", $array[8] );
+        $attrs[0] =~ s/ID=//;
 
         # The intergenic sequence.
         my $intergenic_start = $last_gene_end + 1;
@@ -65,7 +67,7 @@ while ( my $line = <GFF> ) {
         );
 
         if($intergenic_end - $intergenic_start < 0){
-            print($gene_name ." " . $output_intergenic->length() . "\n")
+            print($gene_name ." " . $output_intergenic->length() ." ".$attrs[0] . "\n");
         }
 
         $total_length += $output_intergenic->length();
