@@ -20,6 +20,7 @@ print ("Genome fasta parsed\n");
 # Second, parse the GFF3
 my $last_gene_end = 0;
 my $last_gene_frame = 'o';
+my $last_gene_id = 'o';
 
 # counter: [0]= contains 1, [1] = contains 2, [2] = doesn't contain  
 my @counter = (0,0,0);
@@ -33,7 +34,8 @@ while ( my $line = <GFF> ) {
     my @array = split( "\t", $line );
     my $type = $array[2];
 
-    if (($array[0] =~ m/#/) or ($array[0] =~ m/scaffold/)) {
+    #Skip if GFF line is a comment, the genes are in a scaffold, or if the last gene was the last one in a chromosome.
+    if (($array[0] =~ m/#/) or ($array[0] =~ m/scaffold/) or ($array[0] ne $last_gene_id)) {
         next;
     }
 
@@ -84,11 +86,13 @@ while ( my $line = <GFF> ) {
         #Prepare next intergenic sequence, update counters.
         $last_gene_end = $gene_end;
         $last_gene_frame = $current_frame;
+        $last_gene_id = $array[0];
 
     } elsif ($type eq 'gene') {
         #First gene.
         $last_gene_end = $array[4];
         $last_gene_frame = $array[6];
+        $last_gene_id = $array[0];
         print("Found first gene.\n")
     }
 }
