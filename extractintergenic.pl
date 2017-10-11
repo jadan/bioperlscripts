@@ -60,16 +60,30 @@ while ( my $line = <GFF> ) {
         # The intergenic sequence.
         my $intergenic_start;
         my $intergenic_end;
+        my $temp_frame = $current_frame;
+
         
         if($last_gene_end > $gene_start){
-            $intergenic_start = $gene_end + 1;
-            $intergenic_end = $last_gene_start - 1;
+            #two cases here, either in reverse order (no problem) or overlapped (should skip)
+            if($gene_start > $last_gene_start){
+                $intergenic_start = 1;
+                $intergenic_end = 1;
+            }else{
+                $intergenic_start = $gene_end + 1;
+                $intergenic_end = $last_gene_start - 1;
+                #switch frames (we're looking at sequences in inverse order)
+                $current_frame = $last_gene_frame;
+                $last_gene_frame = $temp_frame;
+            }
+            
         }else{
             $intergenic_start = $last_gene_end + 1;
             $intergenic_end = $gene_start - 1;
         }
 
-        if($intergenic_end - $intergenic_start < 0){print $gene_name.",".$attrs[0].",".$intergenic_start.",".$intergenic_end."\n";}
+        if($intergenic_end - $intergenic_start < 0){
+            print $gene_name.",".$attrs[0].",".$intergenic_start.",".$intergenic_end."\n";
+        }
 
         my $intergenic_seq = $db->seq( $array[0], $intergenic_start, $intergenic_end);
 
@@ -83,26 +97,27 @@ while ( my $line = <GFF> ) {
         $total_length += $output_intergenic->length();
 
         #Write sequence to file. 
+        if($output_intergenic->length() > 1){
+            if ($current_frame eq $last_gene_frame) {
+                $counter[0] +=1;
+                $outfile_intergenic->write_seq($output_intergenic);
 
-        if ($current_frame eq $last_gene_frame) {
-            $counter[0] +=1;
-            $outfile_intergenic->write_seq($output_intergenic);
+            }elsif (($current_frame eq '-') and ($last_gene_frame eq '+')){
+                $counter[1] +=1;
+                $outfile_intergenic->write_seq($output_intergenic);
 
-        }elsif (($current_frame eq '-') and ($last_gene_frame eq '+')){
-            $counter[1] +=1;
-            $outfile_intergenic->write_seq($output_intergenic);
-
-        }elsif (($current_frame eq '+') and ($last_gene_frame eq '-')){
-            $counter[2] +=1;
-            #do not write this to the file, since it contains no regulatory sequences.
-        }else{
-            die $current_frame . $last_gene_frame ."\n";
+            }elsif (($current_frame eq '+') and ($last_gene_frame eq '-')){
+                $counter[2] +=1;
+                #do not write this to the file, since it contains no regulatory sequences.
+            }else{
+                die $current_frame . $last_gene_frame ."\n";
+            }
         }
 
         #Prepare next intergenic sequence, update counters.
         $last_gene_start = $gene_start;
         $last_gene_end = $gene_end;
-        $last_gene_frame = $current_frame;
+        $last_gene_frame = $temp_frame;
         $last_gene_id = $array[0];
 
     } elsif ($type eq 'gene') {
