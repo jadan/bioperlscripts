@@ -34,6 +34,7 @@ open GFF, "<$ARGV[1]" or die $!;
 
 while ( my $line = <GFF> ) {
     chomp $line;
+    print $line;
     my @array = split( "\t", $line );
 
     #Skip if GFF line is a comment, the genes are in a scaffold.
