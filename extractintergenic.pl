@@ -83,7 +83,8 @@ while ( my $line = <GFF> ) {
         }
 
         if($intergenic_end - $intergenic_start < 0){
-            print $gene_name.",".$attrs[0].",".$intergenic_start.",".$intergenic_end."\n";
+            #this few (65 in Phaseolus vulgaris transcripts are out of order and create problems, ignore.)
+
         }
 
         my $intergenic_seq = $db->seq( $array[0], $intergenic_start, $intergenic_end);
@@ -119,6 +120,8 @@ while ( my $line = <GFF> ) {
         $last_gene_start = $gene_start;
         #if current gene is within last gene, don't update last_gene_end
         if($overlapped != 1){
+            $last_gene_end = $gene_end;
+        }else if(($overlapped) and ($gene_end > $last_gene_end)){
             $last_gene_end = $gene_end;
         }
         $last_gene_frame = $temp_frame;
