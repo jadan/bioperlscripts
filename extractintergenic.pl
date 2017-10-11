@@ -8,7 +8,7 @@ use Bio::DB::Fasta;
 
 $| = 1;
 
-print "Usage: perl extractintergenic.pl fastafile.fasta gff3file.gff3 nameofoutput";
+print "Usage: perl extractintergenic.pl fastafile.fasta gff3file.gff3 nameofoutput\n";
 
 my $outfile_intergenic = Bio::SeqIO->new( -format => 'fasta', -file => ">$ARGV[2].intergenic.fasta" );
 
@@ -38,7 +38,8 @@ while ( my $line = <GFF> ) {
     if (($array[0] =~ m/#/) or ($array[0] =~ m/scaffold/)) {
         next;
     }
-    if($last_gene_id ne $array[0]){
+    if(($last_gene_id ne $array[0]) and ($last_gene_id ne 'o')){
+        $last_gene_id = $array[0];
         next;
     }
 
