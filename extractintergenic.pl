@@ -49,7 +49,7 @@ while ( my $line = <GFF> ) {
 
     if (($type eq 'gene') and ( $last_gene_frame ne 'o' ) ) {
         $total_sequences_extracted += 1;
-
+        my $overlapped = 0;
         my $current_frame = $array[6];
         my $gene_name = "prueba".$total_sequences_extracted;
         my $gene_start = $array[3];
@@ -68,6 +68,7 @@ while ( my $line = <GFF> ) {
             if($gene_start > $last_gene_start){
                 $intergenic_start = 1;
                 $intergenic_end = 1;
+                $overlapped = 1;
             }else{
                 $intergenic_start = $gene_end + 1;
                 $intergenic_end = $last_gene_start - 1;
@@ -117,7 +118,7 @@ while ( my $line = <GFF> ) {
         #Prepare next intergenic sequence, update counters.
         $last_gene_start = $gene_start;
         #if current gene is within last gene, don't update last_gene_end
-        if($gene_end > $last_gene_end){
+        if($overlapped != 1){
             $last_gene_end = $gene_end;
         }
         $last_gene_frame = $temp_frame;
