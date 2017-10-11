@@ -69,7 +69,7 @@ while ( my $line = <GFF> ) {
             $intergenic_end = $gene_start - 1;
         }
 
-        if($intergenic_end - $intergenic_start < 0){print $gene_name." ".$attrs[0]."\n";}
+        if($intergenic_end - $intergenic_start < 0){print $gene_name.",".$attrs[0].",".$intergenic_start.",".$intergenic_end."\n";}
 
         my $intergenic_seq = $db->seq( $array[0], $intergenic_start, $intergenic_end);
 
@@ -100,6 +100,7 @@ while ( my $line = <GFF> ) {
         }
 
         #Prepare next intergenic sequence, update counters.
+        $last_gene_start = $gene_start;
         $last_gene_end = $gene_end;
         $last_gene_frame = $current_frame;
         $last_gene_id = $array[0];
