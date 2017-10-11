@@ -64,7 +64,7 @@ while ( my $line = <GFF> ) {
             -alphabet   => 'dna',
         );
 
-        if($intergenic_end - $intergenic_start < 10000){
+        if($intergenic_end - $intergenic_start < 0){
             print($gene_name ." " . $output_intergenic->length() . "\n")
         }
 
