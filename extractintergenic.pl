@@ -19,6 +19,7 @@ print ("Genome fasta parsed\n");
 
 # Second, parse the GFF3
 my $last_gene_end = 0;
+my $last_gene_start = 0;
 my $last_gene_frame = 'o';
 my $last_gene_id = 'o';
 
@@ -69,7 +70,7 @@ while ( my $line = <GFF> ) {
         }
 
         if($intergenic_end - $intergenic_start < 0){print $gene_name." ".$attrs[0]."\n";}
-        
+
         my $intergenic_seq = $db->seq( $array[0], $intergenic_start, $intergenic_end);
 
         my $output_intergenic = Bio::Seq->new(
