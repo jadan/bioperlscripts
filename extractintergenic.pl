@@ -116,7 +116,10 @@ while ( my $line = <GFF> ) {
 
         #Prepare next intergenic sequence, update counters.
         $last_gene_start = $gene_start;
-        $last_gene_end = $gene_end;
+        #if current gene is within last gene, don't update last_gene_end
+        if($gene_end > $last_gene_end){
+            $last_gene_end = $gene_end;
+        }
         $last_gene_frame = $temp_frame;
         $last_gene_id = $array[0];
 
