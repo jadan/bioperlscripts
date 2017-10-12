@@ -34,7 +34,6 @@ open GFF, "<$ARGV[1]" or die $!;
 
 while ( my $line = <GFF> ) {
     chomp $line;
-    print $line;
     my @array = split( "\t", $line );
 
     #Skip if GFF line is a comment, the genes are in a scaffold.
@@ -69,6 +68,12 @@ while ( my $line = <GFF> ) {
         $intergenic_start = $last_gene_end + 1;
         $intergenic_end = $gene_start - 1;
 
+        #Since it is ordered, a negative value means overlap.
+        if ($intergenic_end-$intergenic_start < 0){ 
+            $intergenic_start=1;
+            $intergenic_end=1;
+        }
+
         my $intergenic_seq = $db->seq( $array[0], $intergenic_start, $intergenic_end);
 
         my $output_intergenic = Bio::Seq->new(
@@ -78,31 +83,34 @@ while ( my $line = <GFF> ) {
             -alphabet   => 'dna',
         );
 
-        if ($intergenic_end-$intergenic_start < 0){ 
-            print $gene_name.",".$attrs[0].",".$output_intergenic->length().",".$intergenic_start.",".$intergenic_end."\n"; 
-        }
         #Write sequence to file. 
-        if ($current_frame eq $last_gene_frame) {
-            $counter[0] +=1;
-            #print $gene_name.",".$attrs[0].",".$output_intergenic->length().",".$intergenic_start.",".$intergenic_end."\n";
-            $outfile_intergenic->write_seq($output_intergenic);
-            $total_length += $output_intergenic->length();
-        }elsif (($current_frame eq '-') and ($last_gene_frame eq '+')){
-            $counter[1] +=1;
-            #print $gene_name.",".$attrs[0].",".$output_intergenic->length().",".$intergenic_start.",".$intergenic_end."\n";
-            $outfile_intergenic->write_seq($output_intergenic);
-            $total_length += $output_intergenic->length();
-        }elsif (($current_frame eq '+') and ($last_gene_frame eq '-')){
-            $counter[2] +=1;
-            #do not write this to the file, since it contains no regulatory sequences.
-            #print $gene_name.",".$attrs[0].",".$output_intergenic->length().",".$intergenic_start.",".$intergenic_end."\n";
-        }else{
-            die $current_frame . $last_gene_frame ."\n";
+        #Only count and write the ones that have a length over 1 (non-negative).
+        if($output_intergenic->length() > 1){
+            if ($current_frame eq $last_gene_frame) {
+                $counter[0] +=1;
+                #print $gene_name.",".$attrs[0].",".$output_intergenic->length().",".$intergenic_start.",".$intergenic_end."\n";
+                $outfile_intergenic->write_seq($output_intergenic);
+                $total_length += $output_intergenic->length();
+            }elsif (($current_frame eq '-') and ($last_gene_frame eq '+')){
+                $counter[1] +=1;
+                #print $gene_name.",".$attrs[0].",".$output_intergenic->length().",".$intergenic_start.",".$intergenic_end."\n";
+                $outfile_intergenic->write_seq($output_intergenic);
+                $total_length += $output_intergenic->length();
+            }elsif (($current_frame eq '+') and ($last_gene_frame eq '-')){
+                $counter[2] +=1;
+                #do not write this to the file, since it contains no regulatory sequences.
+                #print $gene_name.",".$attrs[0].",".$output_intergenic->length().",".$intergenic_start.",".$intergenic_end."\n";
+            }else{
+                die $current_frame . $last_gene_frame ."\n";
+            }
         }
 
         #Prepare next intergenic sequence, update counters.
         $last_gene_start = $gene_start;
-        $last_gene_end = $gene_end;
+        #Only update $last_gene_end if the new one is further down the chromosome.
+        if($gene_end > $last_gene_end){
+            $last_gene_end = $gene_end;
+        }
         $last_gene_frame = $current_frame;
         $last_gene_id = $array[0];
 
