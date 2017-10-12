@@ -78,22 +78,24 @@ while ( my $line = <GFF> ) {
             -alphabet   => 'dna',
         );
 
-        $total_length += $output_intergenic->length();
-
+        if ($intergenic_end-$intergenic_start < 0){ 
+            print $gene_name.",".$attrs[0].",".$output_intergenic->length().",".$intergenic_start.",".$intergenic_end."\n"; 
+        }
         #Write sequence to file. 
         if ($current_frame eq $last_gene_frame) {
             $counter[0] +=1;
-            print $gene_name.",".$attrs[0].",".$output_intergenic->length().",".$intergenic_start.",".$intergenic_end."\n";
+            #print $gene_name.",".$attrs[0].",".$output_intergenic->length().",".$intergenic_start.",".$intergenic_end."\n";
             $outfile_intergenic->write_seq($output_intergenic);
+            $total_length += $output_intergenic->length();
         }elsif (($current_frame eq '-') and ($last_gene_frame eq '+')){
             $counter[1] +=1;
-            print $gene_name.",".$attrs[0].",".$output_intergenic->length().",".$intergenic_start.",".$intergenic_end."\n";
+            #print $gene_name.",".$attrs[0].",".$output_intergenic->length().",".$intergenic_start.",".$intergenic_end."\n";
             $outfile_intergenic->write_seq($output_intergenic);
+            $total_length += $output_intergenic->length();
         }elsif (($current_frame eq '+') and ($last_gene_frame eq '-')){
             $counter[2] +=1;
             #do not write this to the file, since it contains no regulatory sequences.
-            print $gene_name.",".$attrs[0].",".$output_intergenic->length().",".$intergenic_start.",".$intergenic_end."\n";
-
+            #print $gene_name.",".$attrs[0].",".$output_intergenic->length().",".$intergenic_start.",".$intergenic_end."\n";
         }else{
             die $current_frame . $last_gene_frame ."\n";
         }
@@ -110,7 +112,6 @@ while ( my $line = <GFF> ) {
         $last_gene_start = $array[3];
         $last_gene_frame = $array[6];
         $last_gene_id = $array[0];
-        print("Found first gene.\n")
     }
 }
 
